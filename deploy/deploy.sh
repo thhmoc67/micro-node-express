@@ -12,7 +12,7 @@ echo "$PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
 # ** End of alternative approach
 
 # disable the host key checking.
-# ./deploy/disableHostKeyChecking.sh
+./deploy/disableHostKeyChecking.sh
 
 # we have already setup the DEPLOYER_SERVER in our gitlab settings which is a
 # comma seperated values of ip addresses.
@@ -33,7 +33,7 @@ echo "ALL_SERVERS ${ALL_SERVERS}"
 for server in "${ALL_SERVERS[@]}"
 do
   echo "deploying to ${server}"
-  ssh -i ubuntu@${server} 'bash -s' < ./deploy/updateAndRestart.sh
+  ssh ubuntu@${server} 'bash -s' < ./deploy/updateAndRestart.sh
 done
 
 
