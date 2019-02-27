@@ -1,35 +1,108 @@
+# Reference: https://www.exclamationlabs.com/blog/continuous-deployment-to-npm-using-gitlab-ci/
 
-# Node docker image on which this would be run
-image: node:8.9.0
+# GitLab uses docker in the background, so we need to specify the 
+# image versions. This is useful because we're freely to use
+# multiple node versions to work with it. They come from the docker
+# repo.
+# Uses NodeJS V 9.4.0
+image: node:9.4.0
 
-#This command is run before actual stages start running
-before_script:
-  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
-  - npm install
+# And to cache them as well.
+cache:
+  paths:
+    - node_modules/
+    - .yarn
 
+# We tell GitLab to install all the packages
+# before running anything.
+# Docker images come with yarn preinstalled
+before_script:  
+  - apt-get update -qq && apt-get install
+
+# You specify the stages. Those are the steps that GitLab will go through 
+# Order matters. 
 stages:
-  - test
-  - deploy
+  # - build
+  # - test
+  - staging
+  - openMr
+  - production
 
-# lint and test are two different jobs in the same stage.
-# This allows us to run these two in parallel and making build faster
-
-# # Job 1:
-# lint:
-#   stage: test
+# Build:
+#   stage: build
+#   tags:
+#     - node
+#   before_script: 
+#     - yarn config set cache-folder .yarn
+#     - yarn install 
 #   script:
-#     - npm run lint
+#     - npm run build
 
-# # Job 2:
-# test:
+# Test:
 #   stage: test
+#   tags:
+#   - node
+#   before_script: 
+#     - yarn config set cache-folder .yarn
+#     - yarn install 
 #   script:
-#     - npm run test
-#     # ToDo: Add coverage
+#   # Installs Chrome
+#     - wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub |  apt-key add -
+#     - echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' |  tee /etc/apt/sources.list.d/google-chrome.list
+#     - apt-get update 
+#     - apt-get install google-chrome-stable -y
+#   # Runs the tests.
+#     - npm run test:karma-headless
 
-deployToAWS:
-  only:
-    - master
-  stage: deploy
+
+Deploy to Staging:
+  stage: staging
+  tags:
+    - node
+  before_script:
+    # Generates to connect to the AWS unit the SSH key.
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    # Sets the permission to 600 to prevent a problem with AWS
+    # that it's too unprotected.
+    - chmod 600  ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'   
+  script:     
+    - bash ./gitlab-deploy/.gitlab-deploy.staging.sh   
+  environment:     
+    name: staging     
+    # Exposes a button that when clicked take you to the defined URL:
+    url: ec2-54-209-170-233.compute-1.amazonaws.com:3000   
+
+# Remember to have the PRIVATE_TOKEN generated. This is only needed to be done once per project and not per user.
+# Once you add it (Needs Master priviliges) as a Secret Variable, it should work.
+Open Merge Request:
+  # Got it from here: https://gitlab.com/tmaier/gitlab-auto-merge-request/blob/develop/.gitlab-ci.yml
+  image: tmaier/gitlab-auto-merge-request
+  stage: openMr
+  tags:
+    - node
   script:
-    - bash deploy/deploy.sh
+    - bash ./gitlab-deploy/auto-merge-request.sh # The name of the script
+  
+
+
+Deploy to Production:
+  stage: production
+  tags:
+    - node
+  before_script:
+  # Generates to connect to the AWS unit the SSH key.
+    - mkdir -p ~/.ssh
+    - echo -e "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    # Sets the permission to 600 to prevent a problem with AWS
+  # that it's too unprotected.
+    - chmod 600  ~/.ssh/id_rsa
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'   
+  script:     
+    - bash ./gitlab-deploy/.gitlab-deploy.prod.sh   
+  environment:     
+    name: production     
+    # Exposes a button that when clicked take you to the defined URL:
+    url: ec2-54-209-170-233.compute-1.amazonaws.com   
+  when: manual
