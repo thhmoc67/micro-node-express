@@ -7,6 +7,7 @@
     "push": "git remote set-url origin git@gitlab.com:thhmoc67/micro-node-express.git & git push & git remote set-url origin git@github.com:thhmoc67/micro-node-express.git & git push "
   },
   "dependencies": {
+    "aws-sdk": "^2.417.0",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
