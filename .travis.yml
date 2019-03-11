@@ -28,5 +28,6 @@ deploy:
   region: "us-east-1"  
   app: "micro-node-app-demo"
   env: "production-node"
+  bucket_name: "aws-codestar-us-east-1-521137413889"
   on:
     branch: master
