@@ -17,7 +17,7 @@ else
 fi
 
 # EB_ENV="$EB_APP-$NODE_ENV"
-EB_ENV="production"
+EB_ENV="production-node"
 echo "Deploying to $EB_ENV"
 
 pip install --user --upgrade awsebcli
