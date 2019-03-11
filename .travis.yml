@@ -5,3 +5,28 @@ node_js:
 after_success:
 - chmod +x ./deploy.sh
 - "./deploy.sh"
+
+language: node_js
+
+node_js:
+  - "8"
+
+sudo: required
+
+services:
+  - docker
+
+after_deploy:
+  - echo "done deploying"
+
+
+deploy:
+  provider: elasticbeanstalk
+  access_key_id: $AWS_ACCESS_KEY_ID
+  secret_access_key:
+    secure: $AWS_SECRET_ACCESS_KE
+  region: "us-east-1"  
+  app: "micro-node-app-demo"
+  env: "production-node"
+  on:
+    branch: master
