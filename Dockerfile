@@ -20,3 +20,5 @@ WORKDIR /var/www/api
 
 # Expose a port and start the server (you may need to change the name here to match your server file)
 EXPOSE 3000
+
+CMD ["node", "server.js"]
