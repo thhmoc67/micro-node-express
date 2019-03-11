@@ -3,15 +3,15 @@ var router = express.Router();
 var AWS = require("aws-sdk");
 
 AWS.config.update({
-  region: "us-east-1",
-  endpoint: "dynamodb.us-east-1.amazonaws.com",
+  region: "us-east-1b",
+  endpoint: "demo-db.crlljscnxlkw.us-east-1.rds.amazonaws.com",
 });
 
 var docClient = new AWS.DynamoDB.DocumentClient();
 /* GET users listing. */
 router.post("/new", async (req, res, next) => {
   console.log("req body", req.body);
-  var table_name = "users";
+  var table_name = "demo-db";
   var created_date = new Date().toDateString();
 
   var params = {
