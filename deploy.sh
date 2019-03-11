@@ -21,6 +21,7 @@ EB_ENV="production-node"
 echo "Deploying to $EB_ENV"
 
 pip install --user --upgrade awsebcli
+pip install --upgrade pip
 
 # Configure AWS credentials for Elastic Beanstalk
 mkdir -p ~/.aws
@@ -28,6 +29,9 @@ echo '[profile eb-cli]' > ~/.aws/config
 echo "AWS_ACCESS_KEY_ID = $AWS_ACCESS_KEY_ID" >> ~/.aws/config
 echo "AWS_SECRET_ACCESS_KEY = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
 echo "AWS_REGION = $AWS_REGION" >> ~/.aws/config
+
+echo "Deploying using elasticbeanstalk"
+
 eb status
 
 # Deploy application to the appropriate ElasticBeanstalk env
