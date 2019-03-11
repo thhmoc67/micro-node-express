@@ -31,7 +31,7 @@ echo "AWS_SECRET_ACCESS_KEY = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/config
 echo "AWS_REGION = $AWS_REGION" >> ~/.aws/config
 
 echo "Deploying using elasticbeanstalk"
-
+eb use $EB_ENV
 eb status
 
 # Deploy application to the appropriate ElasticBeanstalk env
